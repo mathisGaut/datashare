@@ -1,0 +1,28 @@
+# OS
+.DS_Store
+
+# Logs
+*.log
+
+# Env files
+.env
+.env.*
+
+# Dependencies
+/vendor
+node_modules
+
+# Laravel specific
+/datashare-backend/vendor
+/datashare-backend/.env
+
+# Build
+/build
+/dist
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode
+.idea
