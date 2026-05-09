@@ -1,0 +1,1 @@
+Datashare k6 upload fixture — replace or resize for larger load tests.
