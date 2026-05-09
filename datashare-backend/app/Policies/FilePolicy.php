@@ -4,9 +4,12 @@ namespace App\Policies;
 
 use App\Models\File;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class FilePolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view the file.
      */

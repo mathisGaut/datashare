@@ -80,6 +80,28 @@ export default function DashboardPage() {
         }
     };
 
+    const deleteFile = async (id) => {
+
+        const confirmed = window.confirm(
+            "Delete this file ?"
+        );
+    
+        if (!confirmed) {
+            return;
+        }
+    
+        try {
+    
+            await api.delete(`/files/${id}`);
+    
+            fetchFiles();
+    
+        } catch (error) {
+    
+            console.error(error);
+        }
+    };
+
     const logout = async () => {
 
         try {
@@ -168,6 +190,12 @@ export default function DashboardPage() {
                                     Link
                                 </a>
                             </p>
+
+                            <button
+                                onClick={() => deleteFile(file.id)}
+                            >
+                                Delete
+                            </button>
 
                             <hr />
 
