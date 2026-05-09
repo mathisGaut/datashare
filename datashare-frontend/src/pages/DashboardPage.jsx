@@ -1,16 +1,17 @@
 import { useEffect } from "react";
 
-import FileCard from "../components/FileCard";
-import EditFileModal from "../components/EditFileModal";
-import UploadBox from "../components/UploadBox";
-import SearchBar from "../components/SearchBar";
-import Pagination from "../components/Pagination";
+import FileCard from "../components/files/FileCard";
+import EditFileModal from "../components/files/EditFileModal";
+import UploadBox from "../components/files/UploadBox";
+import SearchBar from "../components/files/SearchBar";
+import Pagination from "../components/files/Pagination";
 import useAuth from "../hooks/useAuth";
 import useFiles from "../hooks/useFiles";
 
 export default function DashboardPage() {
 
     const { user, fetchUser, logout } = useAuth();
+    // Hooks
     const {
         files,
         search,
