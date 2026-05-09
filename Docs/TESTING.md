@@ -75,6 +75,14 @@ php artisan test --filter=NomDuTest
 - **Lint** : `npm run lint` dans `datashare-frontend`.
 - Tests unitaires composants : non configurés par défaut ; ajout possible avec **Vitest** + **Testing Library** si besoin.
 
+### Contrôle qualité navigateur (soutenance)
+
+Pour valoriser le livrable auprès d’un public non technique :
+
+1. Parcours **manuel** documenté (T16) : inscription ou connexion → tableau de bord → upload → copie du lien → téléchargement en navigation privée.
+2. **Build production** + **Lighthouse** sur le bundle servi par `npm run preview` (voir [`PERF.md`](PERF.md), section frontend).
+3. Optionnel : extension axe DevTools pour un complément **accessibilité** rapide sur les pages publiques (login / register).
+
 ## Couverture de code (PHPUnit)
 
 Prérequis : extension PHP **PCOV** (recommandé) ou **Xdebug** avec couverture activée.

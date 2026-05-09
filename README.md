@@ -38,8 +38,20 @@ Configurer l’URL de l’API dans `datashare-frontend/src/services/api.js` (`ba
 cd datashare-backend
 composer test
 # Couverture (PCOV ou Xdebug requis) :
-php artisan test --coverage --min=70
+composer run test:coverage
 ```
+
+### 4. Base de données (script)
+
+Après configuration de `datashare-backend/.env` :
+
+```bash
+chmod +x scripts/setup-database.sh
+./scripts/setup-database.sh          # migrations
+./scripts/setup-database.sh --seed   # + utilisateur démo (voir DatabaseSeeder)
+```
+
+Détails : [`scripts/README.md`](scripts/README.md). Alternative Docker : `datashare-backend/compose.yaml` (Laravel Sail).
 
 ---
 
@@ -54,8 +66,11 @@ php artisan test --coverage --min=70
 | [Docs/AI_USAGE.md](Docs/AI_USAGE.md) | Traçabilité de l’usage de l’IA dans le projet |
 | [Docs/TESTING.md](Docs/TESTING.md) | Plan de tests, couverture, commandes |
 | [Docs/SECURITY.md](Docs/SECURITY.md) | Auth, policies, audits |
-| [Docs/PERF.md](Docs/PERF.md) | Scénarios k6 |
-| [Docs/MAINTENANCE.md](Docs/MAINTENANCE.md) | Exploitation et sauvegardes |
+| [Docs/PERF.md](Docs/PERF.md) | k6, budget bundle, Lighthouse, métriques |
+| [Docs/MAINTENANCE.md](Docs/MAINTENANCE.md) | Exploitation, sauvegardes, fréquence des mises à jour |
+| [Docs/SOUTENANCE.md](Docs/SOUTENANCE.md) | Plan de présentation (slides) |
+
+**Lien du dépôt** (à joindre sur la plateforme en TXT/PDF) : [`REPOSITORY_URL.txt`](REPOSITORY_URL.txt).
 
 ## Structure du dépôt
 
@@ -64,6 +79,8 @@ datashare-backend/    # API Laravel 13 (Sanctum)
 datashare-frontend/   # React 19 + Vite + Tailwind
 Docs/                 # Documentation technique et qualité
 perf/                 # Scripts k6 (performance)
+scripts/              # setup-database.sh — migrations / seed
+REPOSITORY_URL.txt    # URL GitHub/GitLab pour remise
 ```
 
 ## Licence

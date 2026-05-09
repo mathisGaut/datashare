@@ -208,5 +208,8 @@ Documentation complémentaire : [`Docs/DATA_MODEL.md`](Docs/DATA_MODEL.md).
 | [SECURITY.md](SECURITY.md) | Sanctum, policies, audits |
 | [PERF.md](PERF.md) | Charge k6, métriques |
 | [MAINTENANCE.md](MAINTENANCE.md) | Structure, mises à jour, sauvegardes |
+| [SOUTENANCE.md](SOUTENANCE.md) | Plan de présentation orale (slides) |
 
-README **racine du dépôt** : [`../README.md`](../README.md).
+README **racine du dépôt** : [`../README.md`](../README.md).  
+**Lien dépôt** (remise plateforme) : fichier [`../REPOSITORY_URL.txt`](../REPOSITORY_URL.txt).  
+**Scripts BDD** : dossier [`../scripts/`](../scripts/).

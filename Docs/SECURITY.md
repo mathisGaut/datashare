@@ -75,3 +75,7 @@ Sortie attendue en l’absence de problème : aucune advisory critique bloquante
 - Durcir `APP_DEBUG=false` en production.
 - Envisager limitation de débit (rate limiting) sur `/api/login` et `/api/register`.
 - Sauvegardes base + dossier `storage/app/uploads` (voir `MAINTENANCE.md`).
+
+## Alignement avec les autres livrables
+
+Toute modification des règles d’auth, des quotas ou des endpoints doit être reflétée dans **`Docs/API_CONTRACT.md`**, **`Docs/TESTING.md`** (cas automatisés) et, si impact utilisateur, dans **`README.md`** racine pour éviter un décalage entre dépôt et soutenance.

@@ -69,6 +69,21 @@ npm audit
 
 Automatiser les audits en CI (voir [SECURITY.md](SECURITY.md)).
 
+### Fréquence recommandée et risques
+
+| Type | Fréquence indicative | Risques principaux | Mitigation |
+| --- | --- | --- | --- |
+| Correctifs **sécurité** (`npm audit`, `composer audit`, advisories GitHub) | Dès notification ou au moins **mensuel** | Régression fonctionnelle après montée de version majeure | Lire changelog ; tests auto + smoke manuel ; branche dédiée |
+| **Laravel / PHP** (`composer update`) | **Trimestriel** ou après release LTS si stabilité recherchée | Breaking changes framework, dépendances transitives | `composer outdated` ; notes de version Laravel ; sauvegarde BDD avant migration |
+| **React / Vite / Tailwind** (`npm update` frontend) | **Mensuel** en prototype ; plus conservateur en prod | Build cassé, changements ESLint | `npm run build` en CI ; fix lint avant merge |
+| **SGBD** (patch serveur MySQL/PostgreSQL) | Selon hébergeur / **criticité** | Indisponibilité pendant upgrade | Fenêtre maintenance ; dump avant upgrade |
+
+Scripts d’aide à l’installation BDD : [`scripts/README.md`](../scripts/README.md) et [`setup-database.sh`](../scripts/setup-database.sh).
+
+### Cohérence documentation / code
+
+Après chaque évolution significative (nouvelle route, limite upload, durée d’expiration des liens), mettre à jour **en même temps** : `Docs/API_CONTRACT.md`, `Docs/SECURITY.md` si exposition surface d’attaque, et ce fichier si procédures changent.
+
 ## Monitoring
 
 - **Disponibilité** : sonder `GET /api/test` ou `GET /up` depuis l’extérieur.
