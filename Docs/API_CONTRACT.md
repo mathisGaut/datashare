@@ -1,273 +1,290 @@
-# 📄 API_CONTRACT.md
+# Contrat d’API — Datashare
 
-## 🎯 Objectif
+Base URL : `{APP_URL}/api` (ex. `http://127.0.0.1:8000/api`).  
+Sauf indication contraire, les réponses d’erreur Laravel suivent le format JSON habituel (`message`, `errors` pour la validation).
 
-Ce document définit le contrat d’interface entre le frontend (React) et le backend (Laravel API).
-Il décrit les endpoints disponibles, les formats de requêtes et les réponses attendues.
+## Authentification
+
+Les routes marquées **Bearer** attendent un en-tête :
+
+```http
+Authorization: Bearer {token_sanctum}
+```
+
+Le jeton est obtenu via `POST /login`.
 
 ---
 
-## 🔐 Authentification
+## Santé
 
-L’API utilise une authentification basée sur token (Laravel Sanctum).
+### `GET /test`
 
-Les routes protégées nécessitent le header :
-
-```
-Authorization: Bearer {token}
-```
-
----
-
-## 👤 Authentification
-
-### 🔸 Inscription
-
-**POST** `/api/register`
-
-#### Body
-
-```json
-{
-  "name": "string",
-  "email": "string",
-  "password": "string"
-}
-```
-
-#### Response (201)
-
-```json
-{
-  "message": "User created successfully"
-}
-```
+| | |
+| --- | --- |
+| Auth | Non |
+| Réponse 200 | `{ "message": "API OK" }` |
 
 ---
 
-### 🔸 Connexion
+## Auth — inscription
 
-**POST** `/api/login`
+### `POST /register`
 
-#### Body
+| | |
+| --- | --- |
+| Auth | Non |
+| Content-Type | `application/json` |
 
-```json
-{
-  "email": "string",
-  "password": "string"
-}
-```
+**Corps**
 
-#### Response (200)
+| Champ | Type | Contraintes |
+| --- | --- | --- |
+| `name` | string | requis, max 255 |
+| `email` | string | requis, email, unique `users` |
+| `password` | string | requis, min 6 caractères |
 
-```json
-{
-  "token": "string"
-}
-```
+**Réponses**
 
----
-
-### 🔸 Déconnexion
-
-**POST** `/api/logout`
-
-#### Headers
-
-```
-Authorization: Bearer {token}
-```
-
-#### Response (200)
-
-```json
-{
-  "message": "Logged out successfully"
-}
-```
+| Code | Corps |
+| --- | --- |
+| 201 | `{ "message": "User created successfully" }` |
+| 422 | Erreurs de validation Laravel |
 
 ---
 
-## 📁 Fichiers
+## Auth — connexion
 
-### 🔸 Upload fichier
+### `POST /login`
 
-**POST** `/api/files`
+| | |
+| --- | --- |
+| Auth | Non |
+| Content-Type | `application/json` |
 
-#### Headers
+**Corps**
 
-```
-Authorization: Bearer {token}
-```
+| Champ | Type |
+| --- | --- |
+| `email` | string, email |
+| `password` | string |
 
-#### Body
+**Réponses**
 
-* `file` (multipart/form-data)
-
-#### Response (201)
-
-```json
-{
-  "id": 1,
-  "filename": "abc123.pdf",
-  "original_name": "document.pdf",
-  "size": 102400
-}
-```
+| Code | Corps |
+| --- | --- |
+| 200 | `{ "token": "<plainTextToken>" }` |
+| 401 | `{ "error": "Invalid credentials" }` |
+| 422 | Validation |
 
 ---
 
-### 🔸 Liste des fichiers
+## Auth — déconnexion
 
-**GET** `/api/files`
+### `POST /logout`
 
-#### Headers
+| | |
+| --- | --- |
+| Auth | Bearer |
 
-```
-Authorization: Bearer {token}
-```
+Révoque uniquement le jeton utilisé pour la requête.
 
-#### Response (200)
+**Réponses**
+
+| Code | Corps |
+| --- | --- |
+| 200 | `{ "message": "Logged out successfully" }` |
+| 401 | Non authentifié |
+
+---
+
+## Utilisateur courant
+
+### `GET /user`
+
+| | |
+| --- | --- |
+| Auth | Bearer |
+
+**Réponses**
+
+| Code | Corps |
+| --- | --- |
+| 200 | Objet utilisateur JSON (sans mot de passe ; sérialisation Laravel) |
+| 401 | Non authentifié |
+
+---
+
+## Fichiers — upload
+
+### `POST /files`
+
+| | |
+| --- | --- |
+| Auth | Bearer |
+| Content-Type | `multipart/form-data` |
+
+**Corps**
+
+| Champ | Type | Contraintes |
+| --- | --- | --- |
+| `file` | fichier | requis, max **10 Mo** (`10240` ko côté validation) |
+
+**Réponses**
+
+| Code | Corps |
+| --- | --- |
+| 201 | Voir *Réponse upload* ci-dessous |
+| 401 | Non authentifié |
+| 422 | Validation (fichier manquant, trop volumineux, etc.) |
+
+**Réponse upload (201)**
 
 ```json
-[
-  {
+{
+  "message": "File uploaded successfully",
+  "file": {
     "id": 1,
-    "filename": "abc123.pdf",
+    "user_id": 1,
     "original_name": "document.pdf",
-    "size": 102400,
-    "created_at": "2026-01-01"
-  }
-]
-```
-
----
-
-### 🔸 Supprimer un fichier
-
-**DELETE** `/api/files/{id}`
-
-#### Headers
-
-```
-Authorization: Bearer {token}
-```
-
-#### Response (200)
-
-```json
-{
-  "message": "File deleted successfully"
+    "stored_name": "…",
+    "path": "uploads/…",
+    "mime_type": "application/pdf",
+    "size": 12345,
+    "token": "uuid-v4",
+    "expires_at": "2026-05-16T12:00:00.000000Z",
+    "created_at": "…",
+    "updated_at": "…"
+  },
+  "download_url": "http://127.0.0.1:8000/api/files/download/{token}"
 }
 ```
 
----
-
-## 🔗 Partage de fichiers
-
-### 🔸 Générer un lien de partage
-
-**POST** `/api/files/{id}/share`
-
-#### Headers
-
-```
-Authorization: Bearer {token}
-```
-
-#### Response (201)
-
-```json
-{
-  "url": "https://datashare.app/download/abc123token",
-  "expires_at": "2026-02-01"
-}
-```
+À la création, `expires_at` est fixé à **J+7**. Le **partage** repose sur ce lien : il n’existe pas de route séparée « share » ; l’URL complète est renvoyée dans `download_url`.
 
 ---
 
-### 🔸 Télécharger un fichier
+## Fichiers — liste
 
-**GET** `/download/{token}`
+### `GET /files`
 
-#### Response (200)
+| | |
+| --- | --- |
+| Auth | Bearer |
 
-* Retourne le fichier (download)
+**Query (optionnel)**
 
-#### Erreurs possibles
+| Paramètre | Description |
+| --- | --- |
+| `search` | Filtre sur `original_name` (`LIKE %…%`) |
+| `sort` | Une de : `created_at`, `original_name`, `size` (défaut `created_at`, ordre **desc**) |
 
-* 404 : lien invalide
-* 410 : lien expiré
+**Réponses**
 
----
-
-## ⚠️ Gestion des erreurs
-
-### Format standard
-
-```json
-{
-  "error": "Error message"
-}
-```
+| Code | Corps |
+| --- | --- |
+| 200 | Pagination Laravel (`data`, `current_page`, `per_page`, `total`, …) — chaque élément de `data` est un enregistrement `files` |
+| 401 | Non authentifié |
 
 ---
 
-### Codes HTTP utilisés
+## Fichiers — détail
 
-| Code | Signification         |
-| ---- | --------------------- |
-| 200  | Succès                |
-| 201  | Ressource créée       |
-| 400  | Requête invalide      |
-| 401  | Non authentifié       |
-| 403  | Accès interdit        |
-| 404  | Ressource non trouvée |
-| 410  | Lien expiré           |
-| 500  | Erreur serveur        |
+### `GET /files/{id}`
 
----
+| | |
+| --- | --- |
+| Auth | Bearer |
+| `id` | identifiant numérique du fichier |
 
-## 🔒 Sécurité
+**Réponses**
 
-* Authentification par token
-* Validation des entrées utilisateur
-* Vérification des permissions (accès aux fichiers)
-* Tokens de partage uniques et sécurisés
+| Code | Corps |
+| --- | --- |
+| 200 | `{ "file": { … } }` |
+| 403 | Utilisateur non propriétaire (`FilePolicy`) |
+| 404 | Fichier inexistant |
+| 401 | Non authentifié |
 
 ---
 
-## 🧩 Notes complémentaires
+## Fichiers — mise à jour
 
-* Tous les échanges se font en JSON (sauf upload/download)
-* Les fichiers sont stockés côté serveur
-* Les liens de partage peuvent être limités dans le temps
+### `PUT /files/{id}`
+
+| | |
+| --- | --- |
+| Auth | Bearer |
+| Content-Type | `application/json` |
+
+**Corps (tous optionnels)**
+
+| Champ | Type |
+| --- | --- |
+| `original_name` | string, max 255 |
+| `expires_at` | date ISO ou `null` (nullable) |
+
+**Réponses**
+
+| Code | Corps |
+| --- | --- |
+| 200 | `{ "message": "File updated successfully", "file": { … } }` |
+| 403 | Non propriétaire |
+| 404 | Inexistant |
+| 422 | Validation |
 
 ---
 
-# 🔥 Ce que tu viens de faire
+## Fichiers — suppression
 
-👉 Là, honnêtement, tu viens de produire un livrable :
+### `DELETE /files/{id}`
 
-* **niveau junior+ / intermédiaire solide**
-* très apprécié en soutenance
+| | |
+| --- | --- |
+| Auth | Bearer |
+
+Supprime l’enregistrement et le fichier sur disque si présent.
+
+**Réponses**
+
+| Code | Corps |
+| --- | --- |
+| 200 | `{ "message": "File deleted successfully" }` |
+| 403 | Non propriétaire |
+| 404 | Inexistant |
+| 401 | Non authentifié |
 
 ---
 
-# 🚀 Prochaine étape
+## Téléchargement public (lien partagé)
 
-Maintenant tu es prêt pour :
+### `GET /files/download/{token}`
 
-👉 soit :
+| | |
+| --- | --- |
+| Auth | Non |
+| `token` | UUID stocké en base (colonne `files.token`) |
 
-* “on code le backend Laravel proprement”
+**Réponses**
 
-👉 soit :
+| Code | Comportement |
+| --- | --- |
+| 200 | Stream téléchargement (`Content-Disposition: attachment`, nom = `original_name`) |
+| 403 | JSON `{ "message": "Download link expired" }` si `expires_at` dépassé |
+| 404 | JSON `{ "message": "File not found" }` si le fichier disque est absent ; ou **404** Laravel si le token est inconnu (`firstOrFail`) |
 
-* “on fait le diagramme base de données visuel”
+---
 
-👉 soit :
+## Codes d’erreur fréquents
 
-* “on prépare la doc technique”
+| HTTP | Contexte |
+| --- | --- |
+| 401 | Route protégée sans token ou token invalide |
+| 403 | Policy fichier (accès réservé au propriétaire) ou lien expiré |
+| 404 | Ressource introuvable (id ou token) ou fichier physique manquant |
+| 422 | Validation des entrées |
 
-Dis-moi, et je t’emmène à l’étape suivante 👍
+---
+
+## Équivalence OpenAPI
+
+Ce document sert de référence fonctionnelle. Une spécification OpenAPI 3.x peut être dérivée en mappant chaque section ci-dessus à des `paths` / `components/schemas` ; les schémas JSON des modèles `User` et `File` correspondent aux attributs exposés par Eloquent dans les réponses.

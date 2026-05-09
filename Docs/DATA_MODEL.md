@@ -1,92 +1,104 @@
-# 📄 Modèle de Données (MCD)
+# Modèle de données — Datashare
 
-## 🧠 Objectif
-Le modèle de données a été conçu pour structurer les piliers fondamentaux de l'application :
-* **Gestion des utilisateurs** : Authentification et profils.
-* **Stockage des fichiers** : Métadonnées et traçabilité des uploads.
-* **Partage sécurisé** : Génération de liens d'accès contrôlés.
+Vue **logique** (type MCD) et **physique** (tables Laravel). La base cible est relationnelle (SQLite en dev, MySQL/PostgreSQL en production selon `.env`).
 
----
-
-## 📊 Entités
-
-### 👤 Utilisateur (`User`)
-Représente les comptes enregistrés sur la plateforme.
-
-| Champ | Type | Description |
-| :--- | :--- | :--- |
-| `id` | **UUID / INT** | Identifiant unique (Clé Primaire) |
-| `name` | **string** | Nom complet de l’utilisateur |
-| `email` | **string** | Adresse email unique |
-| `password` | **string** | Mot de passe (hashé via Argon2 ou Bcrypt) |
-| `created_at`| **timestamp** | Date d’inscription |
-
-### 📁 Fichier (`File`)
-Représente les documents physiques stockés sur le serveur ou le cloud.
-
-| Champ | Type | Description |
-| :--- | :--- | :--- |
-| `id` | **UUID / INT** | Identifiant unique (Clé Primaire) |
-| `user_id` | **FK** | Référence à l’utilisateur propriétaire |
-| `filename` | **string** | Nom technique sur le stockage (ex: `uuid.ext`) |
-| `original_name`| **string** | Nom d'origine du fichier (ex: `rapport.pdf`) |
-| `path` | **string** | Chemin relatif ou URL de stockage |
-| `size` | **integer** | Taille en octets |
-| `mime_type` | **string** | Type de contenu (ex: `application/pdf`) |
-| `created_at` | **timestamp** | Horodatage de l'upload |
-
-### 🔗 Partage (`Share`)
-Gère les liens d'accès publics ou privés générés pour un fichier.
-
-| Champ | Type | Description |
-| :--- | :--- | :--- |
-| `id` | **UUID / INT** | Identifiant unique (Clé Primaire) |
-| `file_id` | **FK** | Référence au fichier partagé |
-| `token` | **string** | Clé d'accès unique et sécurisée (Slug) |
-| `expires_at` | **timestamp** | Date d’expiration (optionnelle) |
-| `created_at` | **timestamp** | Date de génération du lien |
-
----
-
-## 🔗 Relations & Cardinalités
-
-Le schéma repose sur une hiérarchie simple et efficace :
-
-* **User 1:N File** : Un utilisateur peut posséder plusieurs fichiers, mais un fichier appartient à un seul propriétaire.
-* **File 1:N Share** : Un fichier peut faire l'objet de plusieurs partages (ex: un lien public, un lien avec expiration différente).
-
-
-
----
-
-## 🧩 Schéma relationnel simplifié
+## MCD (vue conceptuelle)
 
 ```mermaid
 erDiagram
     USER ||--o{ FILE : "possède"
-    FILE ||--o{ SHARE : "génère"
-
     USER {
-        uuid id
+        bigint id PK
         string name
-        string email
+        string email UK
+        string password_hash
+        datetime email_verified_at "nullable"
+        datetime created_at
+        datetime updated_at
     }
     FILE {
-        uuid id
-        string filename
-        int size
-    }
-    SHARE {
-        uuid id
-        string token
-        timestamp expires_at
+        bigint id PK
+        bigint user_id FK
+        string original_name
+        string stored_name
+        string path
+        string mime_type
+        bigint size
+        string token UK
+        datetime expires_at "nullable"
+        datetime created_at
+        datetime updated_at
     }
 ```
 
+### Entités
+
+| Entité | Description |
+| --- | --- |
+| **USER** | Compte applicatif : identité pour l’auth Sanctum et propriété des fichiers. |
+| **FILE** | Métadonnées d’un dépôt + jeton opaque pour le téléchargement anonyme par URL. |
+
+### Relations
+
+- **USER → FILE** : relation **1,N** (un utilisateur possède plusieurs fichiers ; un fichier appartient à exactement un utilisateur).
+- Suppression utilisateur : **cascade** sur les fichiers (`onDelete('cascade')` sur la clé étrangère).
+
+### Règles métier reflétées en base
+
+- Le **téléchargement public** ne passe pas par `user_id` : il utilise `FILE.token` (unique).
+- **`expires_at`** contrôle la validité du lien ; `null` peut être accepté côté schéma mais le flux métier fixe une date à l’upload (J+7) et permet la mise à jour via l’API.
+
 ---
 
-## 🔒 Choix de conception
+## Modèle physique (tables)
 
-1.  **Sécurité par Token** : L'accès aux fichiers ne se fait pas via l'ID de la base de données, mais via un `token` unique et imprédictible pour éviter le "ID enumeration".
-2.  **Flexibilité du stockage** : La séparation entre `original_name` et `filename` permet d'éviter les conflits de noms sur le disque et les attaques par injection de fichiers.
-3.  **Contrôle temporel** : Le champ `expires_at` permet d'implémenter facilement une logique de liens éphémères, renforçant la confidentialité des données.
+### `users`
+
+| Colonne | Type | Contraintes |
+| --- | --- | --- |
+| `id` | bigint unsigned | PK, auto |
+| `name` | varchar | |
+| `email` | varchar | unique |
+| `email_verified_at` | timestamp | nullable |
+| `password` | varchar | hash stocké |
+| `remember_token` | varchar | nullable |
+| `created_at`, `updated_at` | timestamp | |
+
+Tables Laravel associées dans la même migration initiale : `password_reset_tokens`, `sessions` (mécanismes framework).
+
+### `personal_access_tokens` (Laravel Sanctum)
+
+Stocke les jetons API (`tokenable_type`, `tokenable_id`, `name`, `token`, `abilities`, `expires_at`, …). Utilisée pour émettre le Bearer renvoyé au login.
+
+### `files`
+
+| Colonne | Type | Contraintes |
+| --- | --- | --- |
+| `id` | bigint unsigned | PK |
+| `user_id` | bigint unsigned | FK → `users.id`, cascade delete |
+| `original_name` | varchar | nom affiché / téléchargement |
+| `stored_name` | varchar | nom interne sur disque |
+| `path` | varchar | chemin logique stockage (`uploads/…`) |
+| `mime_type` | varchar | |
+| `size` | bigint unsigned | octets |
+| `token` | varchar | unique — identifiant public du lien |
+| `expires_at` | timestamp | nullable |
+| `created_at`, `updated_at` | timestamp | |
+
+### Stockage fichiers
+
+Les octets du fichier sont stockés via le **filesystem** Laravel (`storage/app/…`), pas dans la base. La colonne `path` relie la ligne `files` au fichier sur disque.
+
+---
+
+## Indices et performances
+
+- Index implicites sur clés primaires et **unique** (`users.email`, `files.token`).
+- Liste paginée des fichiers : filtre `search` sur `original_name`, tri sur colonnes whitelistées en contrôleur (`created_at`, `original_name`, `size`).
+
+---
+
+## Évolution possible (hors MVP)
+
+- Table **SHARE** ou **AUDIT** si l’on veut plusieurs liens par fichier ou traçabilité des téléchargements.
+- Quotas par utilisateur (`max_storage` sur `users` ou agrégation sur `files.size`).
