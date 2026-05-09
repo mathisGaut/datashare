@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Link as LinkIcon, Trash as TrashIcon } from "lucide-react";
+import { Link as LinkIcon, Trash as TrashIcon, Check as CheckIcon } from "lucide-react";
 
 import api from "../services/api";
 
@@ -21,6 +21,8 @@ export default function DashboardPage() {
     const [selectedFile, setSelectedFile] = useState(null);
 
     const [uploadMessage, setUploadMessage] = useState("");
+
+    const [copiedToken, setCopiedToken] = useState(null);
 
     useEffect(() => {
 
@@ -121,6 +123,39 @@ export default function DashboardPage() {
         }
     };
 
+    const updateFile = async (file) => {
+
+        const extension = file.original_name.includes(".")
+            ? "." + file.original_name.split(".").pop()
+            : "";
+
+        const baseName = file.original_name.replace(extension, "");
+
+        const newBaseName = prompt(
+            "New filename",
+            baseName
+        );
+
+        if (!newBaseName) {
+            return;
+        }
+
+        const finalName = `${newBaseName}${extension}`;
+
+        try {
+
+            await api.put(`/files/${file.id}`, {
+                original_name: finalName,
+            });
+
+            fetchFiles();
+
+        } catch (error) {
+
+            console.error(error);
+        }
+    };
+
     const copyLink = async (token) => {
 
         const url = `http://localhost/api/files/download/${token}`;
@@ -129,7 +164,11 @@ export default function DashboardPage() {
 
             await navigator.clipboard.writeText(url);
 
-            alert("Link copied!");
+            setCopiedToken(token);
+
+            setTimeout(() => {
+                setCopiedToken(null);
+            }, 2000);
 
         } catch (error) {
 
@@ -278,8 +317,11 @@ export default function DashboardPage() {
                                             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition cursor-pointer"
                                             title="Copier le lien"
                                         >
-                                            <LinkIcon size={18} className="text-gray-700" />
-                                        </button>
+                                            {copiedToken === file.token ? (
+                                                <CheckIcon size={18} className="text-green-600" />
+                                            ) : (
+                                                <LinkIcon size={18} className="text-gray-700" />
+                                            )}                                        </button>
                                     </div>
 
                                     <div className="flex flex-row gap-2 mt-6">
@@ -290,6 +332,13 @@ export default function DashboardPage() {
                                         >
                                             Download
                                         </a>
+
+                                        <button
+                                            onClick={() => updateFile(file)}
+                                            className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg transition"
+                                        >
+                                            Rename
+                                        </button>
 
                                         <button
                                             onClick={() => deleteFile(file.id)}
