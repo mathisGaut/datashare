@@ -79,4 +79,99 @@ class FileController extends Controller
             $file->original_name
         );
     }
+
+    /**
+     * List authenticated user files
+     */
+    public function index(Request $request)
+    {
+        $search = $request->query('search');
+
+        $sort = $request->query('sort', 'created_at');
+
+        // Allowed sortable columns
+        $allowedSorts = [
+            'created_at',
+            'original_name',
+            'size',
+        ];
+
+        // Prevent invalid sort column
+        if (!in_array($sort, $allowedSorts)) {
+            $sort = 'created_at';
+        }
+
+        $query = auth()->user()->files();
+
+        // Search by original filename
+        if ($search) {
+            $query->where('original_name', 'like', "%{$search}%");
+        }
+
+        $files = $query
+            ->orderBy($sort, 'desc')
+            ->paginate(10);
+
+        return response()->json($files);
+    }
+
+    /**
+     * Show a specific file
+     */
+    public function show(int $id)
+    {
+        $file = File::findOrFail($id);
+
+        $this->authorize('view', $file);
+
+        return response()->json([
+            'file' => $file
+        ]);
+    }
+
+    /**
+     * Delete a file
+     */
+    public function destroy(int $id)
+    {
+        $file = File::findOrFail($id);
+
+        $this->authorize('delete', $file);
+
+        // Delete physical file
+        if (Storage::exists($file->path)) {
+            Storage::delete($file->path);
+        }
+
+        // Delete database record
+        $file->delete();
+
+        return response()->json([
+            'message' => 'File deleted successfully'
+        ]);
+    }
+
+    /**
+     * Update file metadata
+     */
+    public function update(Request $request, int $id)
+    {
+        $file = File::findOrFail($id);
+
+        $this->authorize('update', $file);
+
+        // Validation
+        $validated = $request->validate([
+            'original_name' => 'sometimes|string|max:255',
+            'expires_at' => 'nullable|date',
+        ]);
+
+        // Update fields
+        $file->update($validated);
+
+        return response()->json([
+            'message' => 'File updated successfully',
+            'file' => $file
+        ]);
+    }
 }

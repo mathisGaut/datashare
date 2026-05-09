@@ -19,6 +19,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('files')->group(function () {
         // upload
         Route::post('/', [FileController::class, 'store']);
+        // list
+        Route::get('/', [FileController::class, 'index']);
+        // delete
+        Route::delete('/{id}', [FileController::class, 'destroy']);
+        // update
+        Route::put('/{id}', [FileController::class, 'update']);
+        // show
+        Route::get('/{id}', [FileController::class, 'show']);
     });
 });
 
