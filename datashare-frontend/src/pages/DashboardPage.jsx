@@ -22,6 +22,10 @@ export default function DashboardPage() {
 
     const [uploadMessage, setUploadMessage] = useState("");
 
+    const [uploadProgress, setUploadProgress] = useState(0);
+
+    const [dragActive, setDragActive] = useState(false);
+
     const [copiedToken, setCopiedToken] = useState(null);
 
     useEffect(() => {
@@ -70,28 +74,51 @@ export default function DashboardPage() {
         }
     };
 
-    const uploadFile = async () => {
+    const uploadFile = async (fileToUpload = null) => {
 
-        if (!selectedFile) {
+        const file = fileToUpload || selectedFile;
+
+        if (!file) {
             return;
         }
 
         const formData = new FormData();
 
-        formData.append("file", selectedFile);
+        formData.append("file", file);
 
         try {
 
+            setUploadProgress(0);
+
             const response = await api.post(
                 "/files",
-                formData
+                formData,
+                {
+                    onUploadProgress: (progressEvent) => {
+
+                        const percent = Math.round(
+                            (progressEvent.loaded * 100)
+                            / progressEvent.total
+                        );
+
+                        setUploadProgress(percent);
+                    },
+                }
             );
 
             setUploadMessage(response.data.message);
 
+            setTimeout(() => {
+                setUploadMessage("");
+            }, 3000);
+
             setSelectedFile(null);
 
             fetchFiles();
+
+            setTimeout(() => {
+                setUploadProgress(0);
+            }, 1500);
 
         } catch (error) {
 
@@ -189,6 +216,31 @@ export default function DashboardPage() {
         navigate("/login");
     };
 
+    const handleDrop = async (e) => {
+
+        e.preventDefault();
+
+        setDragActive(false);
+
+        const file = e.dataTransfer.files[0];
+
+        if (file) {
+            uploadFile(file);
+        }
+    };
+
+    const handleDragOver = (e) => {
+
+        e.preventDefault();
+
+        setDragActive(true);
+    };
+
+    const handleDragLeave = () => {
+
+        setDragActive(false);
+    };
+
     return (
         <div className="min-h-screen bg-gray-100">
 
@@ -223,11 +275,25 @@ export default function DashboardPage() {
             <main className="max-w-6xl mx-auto p-6">
 
                 {/* Upload Card */}
-                <div className="bg-white rounded-2xl shadow p-6 mb-8">
-
+                <div
+                    className={`
+        bg-white rounded-2xl shadow p-6 mb-8 border-2 border-dashed transition
+        ${dragActive
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-300"
+                        }
+    `}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                >
                     <h2 className="text-2xl font-semibold mb-4">
                         Upload file
                     </h2>
+
+                    <p className="text-gray-500 mb-4">
+                        Drag & drop a file here or select one manually
+                    </p>
 
                     <div className="flex flex-col md:flex-row gap-4 items-center">
 
@@ -252,6 +318,28 @@ export default function DashboardPage() {
                         <p className="mt-4 text-green-600">
                             {uploadMessage}
                         </p>
+                    )}
+
+                    {uploadProgress > 0 && (
+
+                        <div className="mt-4">
+
+                            <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden">
+
+                                <div
+                                    className="bg-blue-500 h-4 transition-all"
+                                    style={{
+                                        width: `${uploadProgress}%`
+                                    }}
+                                />
+
+                            </div>
+
+                            <p className="text-sm text-gray-500 mt-2">
+                                Uploading... {uploadProgress}%
+                            </p>
+
+                        </div>
                     )}
 
                 </div>
