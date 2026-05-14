@@ -19,10 +19,11 @@ Le jeton est obtenu via `POST /login`.
 
 ### `GET /test`
 
-| | |
-| --- | --- |
-| Auth | Non |
+
+| Auth        | Non                       |
+| ----------- | ------------------------- |
 | Réponse 200 | `{ "message": "API OK" }` |
+
 
 ---
 
@@ -30,25 +31,30 @@ Le jeton est obtenu via `POST /login`.
 
 ### `POST /register`
 
-| | |
-| --- | --- |
-| Auth | Non |
+
+| Auth         | Non                |
+| ------------ | ------------------ |
 | Content-Type | `application/json` |
+
 
 **Corps**
 
-| Champ | Type | Contraintes |
-| --- | --- | --- |
-| `name` | string | requis, max 255 |
-| `email` | string | requis, email, unique `users` |
-| `password` | string | requis, min 6 caractères |
+
+| Champ      | Type   | Contraintes                   |
+| ---------- | ------ | ----------------------------- |
+| `name`     | string | requis, max 255               |
+| `email`    | string | requis, email, unique `users` |
+| `password` | string | requis, min 6 caractères      |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 201 | `{ "message": "User created successfully" }` |
-| 422 | Erreurs de validation Laravel |
+
+| Code | Corps                                        |
+| ---- | -------------------------------------------- |
+| 201  | `{ "message": "User created successfully" }` |
+| 422  | Erreurs de validation Laravel                |
+
 
 ---
 
@@ -56,25 +62,30 @@ Le jeton est obtenu via `POST /login`.
 
 ### `POST /login`
 
-| | |
-| --- | --- |
-| Auth | Non |
+
+| Auth         | Non                |
+| ------------ | ------------------ |
 | Content-Type | `application/json` |
+
 
 **Corps**
 
-| Champ | Type |
-| --- | --- |
-| `email` | string, email |
-| `password` | string |
+
+| Champ      | Type          |
+| ---------- | ------------- |
+| `email`    | string, email |
+| `password` | string        |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | `{ "token": "<plainTextToken>" }` |
-| 401 | `{ "error": "Invalid credentials" }` |
-| 422 | Validation |
+
+| Code | Corps                                |
+| ---- | ------------------------------------ |
+| 200  | `{ "token": "<plainTextToken>" }`    |
+| 401  | `{ "error": "Invalid credentials" }` |
+| 422  | Validation                           |
+
 
 ---
 
@@ -82,18 +93,21 @@ Le jeton est obtenu via `POST /login`.
 
 ### `POST /logout`
 
-| | |
-| --- | --- |
+
 | Auth | Bearer |
+| ---- | ------ |
+
 
 Révoque uniquement le jeton utilisé pour la requête.
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | `{ "message": "Logged out successfully" }` |
-| 401 | Non authentifié |
+
+| Code | Corps                                      |
+| ---- | ------------------------------------------ |
+| 200  | `{ "message": "Logged out successfully" }` |
+| 401  | Non authentifié                            |
+
 
 ---
 
@@ -101,16 +115,19 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `GET /user`
 
-| | |
-| --- | --- |
+
 | Auth | Bearer |
+| ---- | ------ |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | Objet utilisateur JSON (sans mot de passe ; sérialisation Laravel) |
-| 401 | Non authentifié |
+
+| Code | Corps                                                              |
+| ---- | ------------------------------------------------------------------ |
+| 200  | Objet utilisateur JSON (sans mot de passe ; sérialisation Laravel) |
+| 401  | Non authentifié                                                    |
+
 
 ---
 
@@ -118,24 +135,30 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `POST /files`
 
-| | |
-| --- | --- |
-| Auth | Bearer |
+
+|              |                       |
+| ------------ | --------------------- |
+| Auth         | Bearer                |
 | Content-Type | `multipart/form-data` |
+
 
 **Corps**
 
-| Champ | Type | Contraintes |
-| --- | --- | --- |
+
+| Champ  | Type    | Contraintes                                        |
+| ------ | ------- | -------------------------------------------------- |
 | `file` | fichier | requis, max **10 Mo** (`10240` ko côté validation) |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 201 | Voir *Réponse upload* ci-dessous |
-| 401 | Non authentifié |
-| 422 | Validation (fichier manquant, trop volumineux, etc.) |
+
+| Code | Corps                                                |
+| ---- | ---------------------------------------------------- |
+| 201  | Voir *Réponse upload* ci-dessous                     |
+| 401  | Non authentifié                                      |
+| 422  | Validation (fichier manquant, trop volumineux, etc.) |
+
 
 **Réponse upload (201)**
 
@@ -167,23 +190,28 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `GET /files`
 
-| | |
-| --- | --- |
+
 | Auth | Bearer |
+| ---- | ------ |
+
 
 **Query (optionnel)**
 
-| Paramètre | Description |
-| --- | --- |
-| `search` | Filtre sur `original_name` (`LIKE %…%`) |
-| `sort` | Une de : `created_at`, `original_name`, `size` (défaut `created_at`, ordre **desc**) |
+
+| Paramètre | Description                                                                          |
+| --------- | ------------------------------------------------------------------------------------ |
+| `search`  | Filtre sur `original_name` (`LIKE %…%`)                                              |
+| `sort`    | Une de : `created_at`, `original_name`, `size` (défaut `created_at`, ordre **desc**) |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | Pagination Laravel (`data`, `current_page`, `per_page`, `total`, …) — chaque élément de `data` est un enregistrement `files` |
-| 401 | Non authentifié |
+
+| Code | Corps                                                                                                                        |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 200  | Pagination Laravel (`data`, `current_page`, `per_page`, `total`, …) — chaque élément de `data` est un enregistrement `files` |
+| 401  | Non authentifié                                                                                                              |
+
 
 ---
 
@@ -191,19 +219,22 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `GET /files/{id}`
 
-| | |
-| --- | --- |
-| Auth | Bearer |
+
+| Auth | Bearer                           |
+| ---- | -------------------------------- |
 | `id` | identifiant numérique du fichier |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | `{ "file": { … } }` |
-| 403 | Utilisateur non propriétaire (`FilePolicy`) |
-| 404 | Fichier inexistant |
-| 401 | Non authentifié |
+
+| Code | Corps                                       |
+| ---- | ------------------------------------------- |
+| 200  | `{ "file": { … } }`                         |
+| 403  | Utilisateur non propriétaire (`FilePolicy`) |
+| 404  | Fichier inexistant                          |
+| 401  | Non authentifié                             |
+
 
 ---
 
@@ -211,26 +242,31 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `PUT /files/{id}`
 
-| | |
-| --- | --- |
-| Auth | Bearer |
+
+| Auth         | Bearer             |
+| ------------ | ------------------ |
 | Content-Type | `application/json` |
+
 
 **Corps (tous optionnels)**
 
-| Champ | Type |
-| --- | --- |
-| `original_name` | string, max 255 |
-| `expires_at` | date ISO ou `null` (nullable) |
+
+| Champ           | Type                          |
+| --------------- | ----------------------------- |
+| `original_name` | string, max 255               |
+| `expires_at`    | date ISO ou `null` (nullable) |
+
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | `{ "message": "File updated successfully", "file": { … } }` |
-| 403 | Non propriétaire |
-| 404 | Inexistant |
-| 422 | Validation |
+
+| Code | Corps                                                       |
+| ---- | ----------------------------------------------------------- |
+| 200  | `{ "message": "File updated successfully", "file": { … } }` |
+| 403  | Non propriétaire                                            |
+| 404  | Inexistant                                                  |
+| 422  | Validation                                                  |
+
 
 ---
 
@@ -238,20 +274,23 @@ Révoque uniquement le jeton utilisé pour la requête.
 
 ### `DELETE /files/{id}`
 
-| | |
-| --- | --- |
+
 | Auth | Bearer |
+| ---- | ------ |
+
 
 Supprime l’enregistrement et le fichier sur disque si présent.
 
 **Réponses**
 
-| Code | Corps |
-| --- | --- |
-| 200 | `{ "message": "File deleted successfully" }` |
-| 403 | Non propriétaire |
-| 404 | Inexistant |
-| 401 | Non authentifié |
+
+| Code | Corps                                        |
+| ---- | -------------------------------------------- |
+| 200  | `{ "message": "File deleted successfully" }` |
+| 403  | Non propriétaire                             |
+| 404  | Inexistant                                   |
+| 401  | Non authentifié                              |
+
 
 ---
 
@@ -259,32 +298,32 @@ Supprime l’enregistrement et le fichier sur disque si présent.
 
 ### `GET /files/download/{token}`
 
-| | |
-| --- | --- |
-| Auth | Non |
+
+| Auth    | Non                                         |
+| ------- | ------------------------------------------- |
 | `token` | UUID stocké en base (colonne `files.token`) |
+
 
 **Réponses**
 
-| Code | Comportement |
-| --- | --- |
-| 200 | Stream téléchargement (`Content-Disposition: attachment`, nom = `original_name`) |
-| 403 | JSON `{ "message": "Download link expired" }` si `expires_at` dépassé |
-| 404 | JSON `{ "message": "File not found" }` si le fichier disque est absent ; ou **404** Laravel si le token est inconnu (`firstOrFail`) |
+
+| Code | Comportement                                                                                                                        |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 200  | Stream téléchargement (`Content-Disposition: attachment`, nom = `original_name`)                                                    |
+| 403  | JSON `{ "message": "Download link expired" }` si `expires_at` dépassé                                                               |
+| 404  | JSON `{ "message": "File not found" }` si le fichier disque est absent ; ou **404** Laravel si le token est inconnu (`firstOrFail`) |
+
 
 ---
 
 ## Codes d’erreur fréquents
 
-| HTTP | Contexte |
-| --- | --- |
-| 401 | Route protégée sans token ou token invalide |
-| 403 | Policy fichier (accès réservé au propriétaire) ou lien expiré |
-| 404 | Ressource introuvable (id ou token) ou fichier physique manquant |
-| 422 | Validation des entrées |
 
----
+| HTTP | Contexte                                                         |
+| ---- | ---------------------------------------------------------------- |
+| 401  | Route protégée sans token ou token invalide                      |
+| 403  | Policy fichier (accès réservé au propriétaire) ou lien expiré    |
+| 404  | Ressource introuvable (id ou token) ou fichier physique manquant |
+| 422  | Validation des entrées                                           |
 
-## Équivalence OpenAPI
 
-Ce document sert de référence fonctionnelle. Une spécification OpenAPI 3.x peut être dérivée en mappant chaque section ci-dessus à des `paths` / `components/schemas` ; les schémas JSON des modèles `User` et `File` correspondent aux attributs exposés par Eloquent dans les réponses.

@@ -29,14 +29,6 @@ Offrir aux freelances et petites structures un **dépôt web sécurisé** avec *
 - **PHPUnit Feature** sur l’API : meilleur rapport effort / confiance pour les parcours critiques (auth, upload, policy, téléchargement par jeton).
 - **k6** sur upload + download : démonstration mesurable pour la perf, conforme au brief.
 
-## Ce qui est volontairement hors MVP
-
-- OAuth Google/GitHub, 2FA, antivirus sur upload.
-- CDN dédié, multipart résiliable, chiffrement applicatif des fichiers au repos (hors HTTPS transport).
-- Application mobile native.
-
-Ces points peuvent figurer sur une **feuille de route** post-levée de fonds.
-
 ## Indicateurs de réussite du prototype
 
 - Parcours démo **bout en bout** en moins de cinq minutes (création de compte, upload, copie du lien, téléchargement incognito).

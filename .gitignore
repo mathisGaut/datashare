@@ -4,25 +4,21 @@
 # Logs
 *.log
 
-# Env files
+# Environment
 .env
 .env.*
 
 # Dependencies
-/vendor
-node_modules
-
-# Laravel specific
-/datashare-backend/vendor
-/datashare-backend/.env
+vendor/
+node_modules/
 
 # Build
-/build
-/dist
+build/
+dist/
 
 # Docker
 docker-compose.override.yml
 
 # IDE
-.vscode
-.idea
+.vscode/
+.idea/

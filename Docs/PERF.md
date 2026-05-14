@@ -10,12 +10,12 @@ Ce document couvre la **performance backend** (k6), le **budget frontend** (bund
 
 - [k6](https://k6.io/docs/getting-started/installation/) installé (`k6 version`).
 - API Laravel joignable (ex. `php artisan serve` → `http://127.0.0.1:8000`).
-- Compte utilisateur présent en base (par défaut le seeder crée `test@example.com` avec le mot de passe **`password`** — voir `DatabaseSeeder` / `UserFactory`).
+- Compte utilisateur présent en base (par défaut le seeder crée `test@example.com` avec le mot de passe `**password`** — voir `DatabaseSeeder` / `UserFactory`).
 
 ### Script fourni
 
-Fichier : [`perf/upload-test.js`](../perf/upload-test.js)  
-Fixture : [`perf/fixtures/sample-upload.txt`](../perf/fixtures/sample-upload.txt)
+Fichier : `[perf/upload-test.js](../perf/upload-test.js)`  
+Fixture : `[perf/fixtures/sample-upload.txt](../perf/fixtures/sample-upload.txt)`
 
 Depuis le dossier `perf/` :
 
@@ -32,12 +32,14 @@ FIXTURE_PATH=perf/fixtures/sample-upload.txt k6 run perf/upload-test.js
 
 Variables d’environnement utiles :
 
-| Variable | Défaut | Description |
-| --- | --- | --- |
-| `BASE_URL` | `http://localhost:8000` | Origine du serveur Laravel (sans `/api`) |
-| `EMAIL` | `test@example.com` | Compte pour `POST /api/login` |
-| `PASSWORD` | `password` | Mot de passe du compte |
+
+| Variable       | Défaut                         | Description                                                          |
+| -------------- | ------------------------------ | -------------------------------------------------------------------- |
+| `BASE_URL`     | `http://localhost:8000`        | Origine du serveur Laravel (sans `/api`)                             |
+| `EMAIL`        | `test@example.com`             | Compte pour `POST /api/login`                                        |
+| `PASSWORD`     | `password`                     | Mot de passe du compte                                               |
 | `FIXTURE_PATH` | `./fixtures/sample-upload.txt` | Chemin du fichier uploadé (relatif au répertoire de lancement de k6) |
+
 
 Exemple :
 
@@ -95,11 +97,13 @@ npm run build
 
 Vite affiche les tailles **brutes** et **gzip** des assets. Exemple de sortie **à titre indicatif** (les hash de fichiers changent à chaque build) :
 
-| Asset (prod) | Taille | gzip (indicatif) |
-| --- | --- | --- |
-| `index.html` | ~0,5 ko | ~0,3 ko |
-| CSS principal | ~16 ko | ~4 ko |
-| JS principal (bundle client) | ~292 ko | ~94 ko |
+
+| Asset (prod)                 | Taille  | gzip (indicatif) |
+| ---------------------------- | ------- | ---------------- |
+| `index.html`                 | ~0,5 ko | ~0,3 ko          |
+| CSS principal                | ~16 ko  | ~4 ko            |
+| JS principal (bundle client) | ~292 ko | ~94 ko           |
+
 
 **Ordre de grandeur actuel** : le JavaScript bundlé domine le budget ; le gzip réduit fortement le transfert réseau.
 
@@ -124,36 +128,44 @@ Recopier ce tableau dans un rapport ou une annexe et **le remplir** après chaqu
 
 ### API — temps de réponse (indicatif)
 
-| Date | Environnement | Endpoint / scénario | p50 / moyenne | p95 | Notes |
-| --- | --- | --- | --- | --- | --- |
-| *à remplir* | ex. MacBook M1, `php artisan serve` | `POST /api/login` | | | |
-| *à remplir* | idem | `POST /api/files` (fichier ~100 ko) | | | sortie k6 |
-| *à remplir* | idem | `GET /api/files/download/{token}` | | | |
+
+| Date        | Environnement                       | Endpoint / scénario                 | p50 / moyenne | p95 | Notes     |
+| ----------- | ----------------------------------- | ----------------------------------- | ------------- | --- | --------- |
+| *à remplir* | ex. MacBook M1, `php artisan serve` | `POST /api/login`                   |               |     |           |
+| *à remplir* | idem                                | `POST /api/files` (fichier ~100 ko) |               |     | sortie k6 |
+| *à remplir* | idem                                | `GET /api/files/download/{token}`   |               |     |           |
+
 
 ### Transferts — tailles
 
-| Contexte | Taille fichier test | Résultat attendu |
-| --- | --- | --- |
-| Upload max MVP | 10 Mo (limite validation) | 201 si auth ; 422 si dépassement |
-| Fixture k6 | `sample-upload.txt` (quelques octets) | Mesure surtout la latence, pas le débit |
+
+| Contexte       | Taille fichier test                   | Résultat attendu                        |
+| -------------- | ------------------------------------- | --------------------------------------- |
+| Upload max MVP | 10 Mo (limite validation)             | 201 si auth ; 422 si dépassement        |
+| Fixture k6     | `sample-upload.txt` (quelques octets) | Mesure surtout la latence, pas le débit |
+
 
 ### Frontend — bundle
 
-| Date | `npm run build` | JS gzip (ko) | CSS gzip (ko) | Commentaire |
-| --- | --- | --- | --- | --- |
-| 2026-05-09 | Vite 8 | ~94 | ~4 | Valeurs indicatives ; re-générer après changement de deps |
+
+| Date       | `npm run build` | JS gzip (ko) | CSS gzip (ko) | Commentaire                                               |
+| ---------- | --------------- | ------------ | ------------- | --------------------------------------------------------- |
+| 2026-05-09 | Vite 8          | ~94          | ~4            | Valeurs indicatives ; re-générer après changement de deps |
+
 
 ---
 
 ## 4. Analyse — optimisations possibles
 
-| Zone | Constat | Action envisageable | Effort |
-| --- | --- | --- | --- |
-| Frontend | Bundle JS ~94 ko gzip | Code splitting par route (`React.lazy`), réduction des icônes Lucide importées | Moyen |
-| Frontend | LCP / FCP | Préchargement police si ajout ultérieur ; pas de images lourdes sur login | Faible |
-| Backend | Latence upload sur gros fichiers | Stockage objet (S3) + upload direct signé ; worker pour antivirus | Élevé (hors MVP) |
-| Backend | Montée en charge | File d’attente pour traitements lourds, plusieurs workers PHP-FPM, cache Redis pour sessions | Moyen |
-| Réseau | Latence clients éloignés | CDN pour assets statiques du front ; API derrière même région | Variable |
+
+| Zone     | Constat                          | Action envisageable                                                                          | Effort           |
+| -------- | -------------------------------- | -------------------------------------------------------------------------------------------- | ---------------- |
+| Frontend | Bundle JS ~94 ko gzip            | Code splitting par route (`React.lazy`), réduction des icônes Lucide importées               | Moyen            |
+| Frontend | LCP / FCP                        | Préchargement police si ajout ultérieur ; pas de images lourdes sur login                    | Faible           |
+| Backend  | Latence upload sur gros fichiers | Stockage objet (S3) + upload direct signé ; worker pour antivirus                            | Élevé (hors MVP) |
+| Backend  | Montée en charge                 | File d’attente pour traitements lourds, plusieurs workers PHP-FPM, cache Redis pour sessions | Moyen            |
+| Réseau   | Latence clients éloignés         | CDN pour assets statiques du front ; API derrière même région                                | Variable         |
+
 
 Ces actions dépassent souvent le périmètre du prototype ; elles montrent une **vision produit** pour les investisseurs ou le jury.
 
@@ -163,3 +175,4 @@ Ces actions dépassent souvent le périmètre du prototype ; elles montrent une 
 
 - [MAINTENANCE.md](MAINTENANCE.md) — logs, supervision, sauvegardes.
 - [TESTING.md](TESTING.md) — validation fonctionnelle avant mesures.
+
