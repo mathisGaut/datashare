@@ -4,6 +4,7 @@ export default function UploadBox({
     handleDragOver,
     handleDragLeave,
     setSelectedFile,
+    selectedFile,
     uploadFile,
     uploadMessage,
     uploadProgress,
@@ -31,30 +32,73 @@ export default function UploadBox({
                 Drag & drop a file here or select one manually
             </p>
 
-            <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="flex flex-col gap-4">
 
-                <input
-                    type="file"
-                    onChange={(e) => {
-                        setSelectedFile(e.target.files[0]);
-                    }}
-                    className="block w-full border rounded-lg p-2"
-                />
+                <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
 
-                <button
-                    onClick={uploadFile}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-                >
-                    Upload
-                </button>
+                    <label
+                        className="
+            flex items-center justify-center gap-2
+            px-5 py-3
+            bg-white border border-gray-300
+            rounded-xl cursor-pointer
+            hover:border-blue-500 hover:bg-blue-50
+            transition shadow-sm
+            min-w-[180px]
+        "
+                    >
+                        <i className="fa-solid fa-paperclip text-blue-600"></i>
+
+                        <span className="font-medium text-gray-700">
+                            Select file
+                        </span>
+
+                        <input
+                            type="file"
+                            onChange={(e) => {
+                                setSelectedFile(e.target.files[0]);
+                            }}
+                            className="hidden"
+                        />
+                    </label>
+
+                    <div
+                        className="
+            flex-1 px-4 py-3
+            bg-gray-50 border border-gray-200
+            rounded-xl text-sm text-gray-600
+            truncate
+        "
+                    >
+                        {selectedFile
+                            ? selectedFile.name
+                            : "No file selected"}
+                    </div>
+
+                    <button
+                        onClick={() => uploadFile(selectedFile)}
+                        disabled={!selectedFile}
+                        className="
+            px-6 py-3 rounded-xl
+            bg-blue-600 text-white font-medium
+            hover:bg-blue-700
+            disabled:bg-gray-300
+            disabled:cursor-not-allowed
+            transition shadow-sm
+        "
+                    >
+                        Upload
+                    </button>
+
+                </div>
+
+                {uploadMessage && (
+                    <p className="text-sm text-green-600 font-medium">
+                        {uploadMessage}
+                    </p>
+                )}
 
             </div>
-
-            {uploadMessage && (
-                <p className="mt-4 text-green-600">
-                    {uploadMessage}
-                </p>
-            )}
 
             {uploadProgress > 0 && (
 

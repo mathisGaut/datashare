@@ -104,6 +104,7 @@ export default function DashboardPage() {
                     handleDragOver={handleDragOver}
                     handleDragLeave={handleDragLeave}
                     setSelectedFile={setSelectedFile}
+                    selectedFile={selectedFile}
                     uploadFile={uploadFile}
                     uploadMessage={uploadMessage}
                     uploadProgress={uploadProgress}
