@@ -9,6 +9,7 @@ export default function LoginPage() {
     const location = useLocation();
 
     const registered = location.state?.registered;
+    const redirectMessage = location.state?.message;
 
     const [form, setForm] = useState({
         email: "",
@@ -35,7 +36,7 @@ export default function LoginPage() {
 
             localStorage.setItem("token", response.data.token);
 
-            navigate("/");
+            navigate("/dashboard");
 
         } catch (err) {
 
@@ -60,6 +61,15 @@ export default function LoginPage() {
                         </p>
 
                     </div>
+                    {redirectMessage && (
+                        <div
+                            className="mb-6 rounded-lg border border-ds-peach bg-ds-peach-light text-ds-ink text-sm px-4 py-3"
+                            role="status"
+                        >
+                            {redirectMessage}
+                        </div>
+                    )}
+
                     {registered && (
                         <div
                             className="mb-6 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3"

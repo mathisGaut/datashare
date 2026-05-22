@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@theme {
+  --color-ds-salmon: #e8877a;
+  --color-ds-salmon-dark: #d97265;
+  --color-ds-peach: #fde2d2;
+  --color-ds-peach-light: #fff5f0;
+  --color-ds-cream: #fffaf7;
+  --color-ds-sidebar-top: #ffc9a8;
+  --color-ds-sidebar-bottom: #e8877a;
+  --color-ds-ink: #1a1a1a;
+  --color-ds-muted: #6b7280;
+  --color-ds-btn-dark: #2d2d2d;
+}
+
+body {
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    sans-serif;
+}

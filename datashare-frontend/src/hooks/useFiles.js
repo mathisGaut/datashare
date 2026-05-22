@@ -36,6 +36,7 @@ export default function useFiles() {
                 params: {
                     search,
                     page: currentPage,
+                    per_page: 100,
                 },
             });
 
@@ -81,7 +82,7 @@ export default function useFiles() {
                 }
             );
 
-            setUploadMessage(response.data.message);
+            setUploadMessage("Fichier ajouté avec succès");
 
             setTimeout(() => {
                 setUploadMessage("");
@@ -99,14 +100,14 @@ export default function useFiles() {
 
             console.error(error);
 
-            setUploadMessage("Upload failed");
+            setUploadMessage("Échec de l'ajout du fichier");
         }
     };
 
     const deleteFile = async (id) => {
 
         const confirmed = window.confirm(
-            "Delete this file ?"
+            "Supprimer ce fichier ?"
         );
 
         if (!confirmed) {

@@ -108,9 +108,11 @@ class FileController extends Controller
             $query->where('original_name', 'like', "%{$search}%");
         }
 
+        $perPage = min(max((int) $request->query('per_page', 10), 1), 100);
+
         $files = $query
             ->orderBy($sort, 'desc')
-            ->paginate(10);
+            ->paginate($perPage);
 
         return response()->json($files);
     }

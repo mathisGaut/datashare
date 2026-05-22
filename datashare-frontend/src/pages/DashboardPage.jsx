@@ -1,179 +1,110 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
-import FileCard from "../components/files/FileCard";
-import EditFileModal from "../components/files/EditFileModal";
-import UploadBox from "../components/files/UploadBox";
-import SearchBar from "../components/files/SearchBar";
-import Pagination from "../components/files/Pagination";
+import FileCard from "../components/dashboard/FileCard";
+import FileFilterTabs from "../components/dashboard/FileFilterTabs";
+import Layout from "../components/dashboard/Layout";
 import useAuth from "../hooks/useAuth";
 import useFiles from "../hooks/useFiles";
+import {
+  filterFilesByTab,
+  getDownloadUrl,
+  getExpirationStatus,
+  getFileType,
+} from "../utils/fileDisplay";
 
 export default function DashboardPage() {
+  const { user, fetchUser, logout } = useAuth();
+  const { files, fetchFiles, uploadFile, deleteFile, uploadMessage } =
+    useFiles();
 
-    const { user, fetchUser, logout } = useAuth();
-    // Hooks
-    const {
-        files,
-        search,
-        setSearch,
-        currentPage,
-        setCurrentPage,
-        lastPage,
+  const [activeFilter, setActiveFilter] = useState("tous");
+  const fileInputRef = useRef(null);
 
-        selectedFile,
-        setSelectedFile,
+  useEffect(() => {
+    fetchUser();
+    fetchFiles();
+  }, []);
 
-        uploadMessage,
-        uploadProgress,
-        dragActive,
-        copiedToken,
+  const visibleFiles = filterFilesByTab(files, activeFilter);
 
-        editingFile,
+  const handleAddFiles = () => {
+    fileInputRef.current?.click();
+  };
 
-        editName,
-        setEditName,
+  const handleFileSelected = (event) => {
+    const file = event.target.files?.[0];
 
-        editExpiration,
-        setEditExpiration,
+    if (file) {
+      uploadFile(file);
+    }
 
-        setEditingFile,
+    event.target.value = "";
+  };
 
-        fetchFiles,
-        uploadFile,
-        deleteFile,
-        openEditModal,
-        saveFileEdit,
-        copyLink,
-        handleDrop,
-        handleDragOver,
-        handleDragLeave,
+  return (
+    <Layout
+      onLogout={logout}
+      onAddFiles={handleAddFiles}
+      userName={user?.name}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
 
-    } = useFiles();
+      <div className="mb-6 lg:mb-8">
+        <h2 className="text-2xl font-bold text-ds-ink lg:text-3xl">
+          Mes fichiers
+        </h2>
+      </div>
 
-    // Fetch user on mount
-    useEffect(() => {
+      <div className="mb-6 lg:mb-8">
+        <FileFilterTabs
+          activeFilter={activeFilter}
+          onFilterChange={setActiveFilter}
+        />
+      </div>
 
-        fetchUser();
+      {uploadMessage && (
+        <p
+          className="mb-6 rounded-xl border border-ds-peach bg-ds-peach-light px-4 py-3 text-sm text-ds-ink"
+          role="status"
+        >
+          {uploadMessage}
+        </p>
+      )}
 
-    }, []);
+      {visibleFiles.length === 0 ? (
+        <p className="rounded-2xl border border-ds-peach bg-white px-6 py-10 text-center text-sm text-ds-muted lg:text-base">
+          {files.length === 0
+            ? "Aucun fichier pour le moment. Ajoutez-en via le menu ou le bouton ci-dessus."
+            : "Aucun fichier dans cette catégorie."}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3 lg:gap-4">
+          {visibleFiles.map((file) => {
+            const { isExpired, statusText } = getExpirationStatus(
+              file.expires_at,
+            );
 
-    // Fetch files on search or page change
-    useEffect(() => {
-
-        fetchFiles();
-
-    }, [search, currentPage]);
-
-    return (
-        <div className="min-h-screen bg-gray-100">
-
-            {/* Header */}
-            <header className="bg-white shadow-sm">
-
-                <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-800">
-                            DataShare
-                        </h1>
-
-                        {user && (
-                            <p className="text-gray-500 text-sm">
-                                Connected as {user.name}
-                            </p>
-                        )}
-                    </div>
-
-                    <button
-                        onClick={logout}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition"
-                    >
-                        Logout
-                    </button>
-
-                </div>
-
-            </header>
-
-            <main className="max-w-6xl mx-auto p-6">
-
-                {/* Upload Card */}
-                <UploadBox
-                    dragActive={dragActive}
-                    handleDrop={handleDrop}
-                    handleDragOver={handleDragOver}
-                    handleDragLeave={handleDragLeave}
-                    setSelectedFile={setSelectedFile}
-                    selectedFile={selectedFile}
-                    uploadFile={uploadFile}
-                    uploadMessage={uploadMessage}
-                    uploadProgress={uploadProgress}
-                />
-
-                {/* Files */}
-                <div>
-
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-                        <h2 className="text-2xl font-semibold">
-                            Your files
-                        </h2>
-
-                        <SearchBar
-                            search={search}
-                            setSearch={setSearch}
-                            setCurrentPage={setCurrentPage}
-                        />
-
-                    </div>
-
-                    {files.length === 0 ? (
-
-                        <div className="bg-white rounded-2xl shadow p-8 text-center text-gray-500">
-
-                            No files uploaded yet
-
-                        </div>
-
-                    ) : (
-
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                            {files.map(file => (
-
-                                <FileCard
-                                    key={file.id}
-                                    file={file}
-                                    copiedToken={copiedToken}
-                                    copyLink={copyLink}
-                                    openEditModal={openEditModal}
-                                    deleteFile={deleteFile}
-                                />
-
-                            ))}
-
-                        </div>
-
-                    )}
-
-                </div>
-                <Pagination
-                    currentPage={currentPage}
-                    lastPage={lastPage}
-                    setCurrentPage={setCurrentPage}
-                />
-
-                <EditFileModal
-                    editingFile={editingFile}
-                    editName={editName}
-                    setEditName={setEditName}
-                    editExpiration={editExpiration}
-                    setEditExpiration={setEditExpiration}
-                    setEditingFile={setEditingFile}
-                    saveFileEdit={saveFileEdit}
-                />
-            </main>
-
+            return (
+              <FileCard
+                key={file.id}
+                name={file.original_name}
+                type={getFileType(file.mime_type, file.original_name)}
+                statusText={statusText}
+                isExpired={isExpired}
+                onDelete={() => deleteFile(file.id)}
+                onAccess={() =>
+                  window.open(getDownloadUrl(file.token), "_blank")
+                }
+              />
+            );
+          })}
         </div>
-    );
+      )}
+    </Layout>
+  );
 }
