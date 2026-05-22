@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Download, FileImage, TriangleAlert } from "lucide-react";
 
+import useDocumentTitle from "../hooks/useDocumentTitle";
 import api from "../services/api";
 import {
   formatFileSize,
@@ -19,8 +20,16 @@ const UNAVAILABLE_MESSAGE =
 export default function DownloadPage() {
   const { token } = useParams();
   const [fileInfo, setFileInfo] = useState(null);
-  const [unavailable, setUnavailable] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState(!token);
+  const [loading, setLoading] = useState(Boolean(token));
+
+  useDocumentTitle(
+    loading
+      ? "Téléchargement"
+      : unavailable
+        ? "Fichier indisponible"
+        : fileInfo?.original_name ?? "Téléchargement",
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -48,9 +57,6 @@ export default function DownloadPage() {
 
     if (token) {
       loadFile();
-    } else {
-      setUnavailable(true);
-      setLoading(false);
     }
 
     return () => {
@@ -63,8 +69,8 @@ export default function DownloadPage() {
   };
 
   const Icon =
-    FILE_ICONS[getFileType(fileInfo?.mime_type, fileInfo?.original_name)] ??
-    FileImage;
+    FILE_ICONS[getFileType(fileInfo?.mime_type, fileInfo?.original_name)]
+    ?? FileImage;
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#f3b08d] via-[#ea8c7d] to-[#e56b6f] px-5 py-6">
@@ -75,20 +81,33 @@ export default function DownloadPage() {
 
         <Link
           to="/login"
-          className="rounded-xl bg-ds-btn-dark px-4 py-2 text-sm font-medium text-white"
+          className="min-h-11 inline-flex items-center rounded-xl bg-ds-btn-dark px-4 py-2 text-sm font-medium text-white"
         >
           Se connecter
         </Link>
       </header>
 
-      <main className="flex flex-1 flex-col items-center justify-center px-2 py-10">
+      <main
+        id="main-content"
+        className="flex flex-1 flex-col items-center justify-center px-2 py-10"
+        aria-busy={loading}
+      >
         <div className="w-full max-w-lg rounded-2xl bg-white px-6 py-8 shadow-lg sm:px-10 sm:py-10">
           {loading ? (
-            <p className="text-center text-sm text-ds-muted">Chargement…</p>
-          ) : unavailable ? (
-            <p className="text-center text-sm leading-relaxed text-ds-ink sm:text-base">
-              {UNAVAILABLE_MESSAGE}
+            <p
+              className="text-center text-sm text-ds-muted"
+              role="status"
+              aria-live="polite"
+            >
+              Chargement…
             </p>
+          ) : unavailable ? (
+            <div role="alert">
+              <h1 className="sr-only">Fichier indisponible</h1>
+              <p className="text-center text-sm leading-relaxed text-ds-ink sm:text-base">
+                {UNAVAILABLE_MESSAGE}
+              </p>
+            </div>
           ) : (
             <>
               <h1 className="mb-8 text-center text-xl font-bold text-ds-ink sm:text-2xl">
@@ -96,7 +115,10 @@ export default function DownloadPage() {
               </h1>
 
               <div className="mb-8 flex items-start gap-4 rounded-xl">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                  aria-hidden="true"
+                >
                   <Icon size={38} strokeWidth={1.75} />
                 </div>
 
@@ -110,21 +132,30 @@ export default function DownloadPage() {
                 </div>
               </div>
 
-              <div className="mb-8 flex items-center justify-left gap-3 border border-ds-peach bg-ds-peach-light text-orange-800 rounded-lg p-2">
-                <TriangleAlert size={16} strokeWidth={2} />
-                <p className="text-sm text-left text-orange-800">
+              <div
+                className="mb-8 flex items-center justify-left gap-3 rounded-lg border border-ds-peach bg-ds-peach-light p-2 text-orange-800"
+                role="note"
+              >
+                <TriangleAlert
+                  size={16}
+                  strokeWidth={2}
+                  aria-hidden="true"
+                />
+                <p className="text-left text-sm text-orange-800">
                   Le fichier expirera le{" "}
-                  {new Date(fileInfo.expires_at).toLocaleString('fr-FR')}
+                  <time dateTime={fileInfo.expires_at}>
+                    {new Date(fileInfo.expires_at).toLocaleString("fr-FR")}
+                  </time>
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={handleDownload}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-100 py-2.5 border border-orange-600 text-orange-800 transition hover:bg-orange-200 cursor-pointer"
+                className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-orange-600 bg-orange-100 py-2.5 text-orange-800 transition hover:bg-orange-200"
               >
-                <Download size={22} strokeWidth={2} />
-                Télécharger
+                <Download size={22} strokeWidth={2} aria-hidden="true" />
+                Télécharger {fileInfo.original_name}
               </button>
             </>
           )}

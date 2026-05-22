@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import SkipLink from "../SkipLink";
 import Header from "./Header";
 import MobileDrawer from "./MobileDrawer";
 import Sidebar from "./Sidebar";
@@ -14,6 +15,8 @@ export default function Layout({
 
   return (
     <div className="flex min-h-screen bg-ds-cream">
+      <SkipLink />
+
       <Sidebar />
 
       <MobileDrawer
@@ -30,7 +33,13 @@ export default function Layout({
           onOpenMenu={() => setMenuOpen(true)}
           userName={userName}
         />
-        <main className="flex-1 px-4 py-6 lg:px-10 lg:py-8">{children}</main>
+        <main
+          id="main-content"
+          className="flex-1 px-4 py-6 lg:px-10 lg:py-8"
+          tabIndex={-1}
+        >
+          {children}
+        </main>
       </div>
     </div>
   );

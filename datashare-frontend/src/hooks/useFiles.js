@@ -23,6 +23,8 @@ export default function useFiles() {
 
     const [copiedToken, setCopiedToken] = useState(null);
 
+    const [filesError, setFilesError] = useState("");
+
     const [editingFile, setEditingFile] = useState(null);
 
     const [editName, setEditName] = useState("");
@@ -30,6 +32,8 @@ export default function useFiles() {
     const [editExpiration, setEditExpiration] = useState("");
 
     const fetchFiles = async () => {
+
+        setFilesError("");
 
         try {
 
@@ -48,6 +52,10 @@ export default function useFiles() {
         } catch (error) {
 
             console.error(error);
+
+            setFilesError(
+                "Impossible de charger vos fichiers. Réessayez dans un instant.",
+            );
         }
     };
 
@@ -67,7 +75,7 @@ export default function useFiles() {
 
             setUploadProgress(0);
 
-            const response = await api.post(
+            await api.post(
                 "/files",
                 formData,
                 {
@@ -101,7 +109,11 @@ export default function useFiles() {
 
             console.error(error);
 
-            setUploadMessage("Échec de l'ajout du fichier");
+            const message =
+                error.response?.data?.message
+                || "Échec de l'ajout du fichier. Vérifiez le format et la taille.";
+
+            setUploadMessage(message);
         }
     };
 
@@ -124,6 +136,10 @@ export default function useFiles() {
         } catch (error) {
 
             console.error(error);
+
+            setUploadMessage(
+                "Impossible de supprimer ce fichier. Réessayez.",
+            );
         }
     };
 
@@ -188,6 +204,8 @@ export default function useFiles() {
             }, 2000);
         } catch (error) {
             console.error(error);
+
+            setUploadMessage("Impossible de copier le lien dans le presse-papiers.");
         }
     };
 
@@ -229,6 +247,7 @@ export default function useFiles() {
         uploadProgress,
         dragActive,
         copiedToken,
+        filesError,
         editingFile,
         editName,
         setEditName,

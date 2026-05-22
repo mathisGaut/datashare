@@ -29,9 +29,15 @@ export default function FileCard({
   const Icon = FILE_ICONS[type] ?? FileImage;
 
   return (
-    <article className="flex flex-col gap-4 rounded-2xl border border-ds-peach bg-white px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between lg:px-5 lg:py-4">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border border-ds-peach bg-white px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between lg:px-5 lg:py-4"
+      aria-label={`Fichier : ${name}`}
+    >
       <div className="flex min-w-0 items-center gap-3 lg:gap-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ds-peach text-ds-salmon lg:h-11 lg:w-11">
+        <div
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ds-peach text-ds-salmon lg:h-11 lg:w-11"
+          aria-hidden="true"
+        >
           <Icon size={22} strokeWidth={1.75} />
         </div>
 
@@ -40,9 +46,8 @@ export default function FileCard({
             {name}
           </h3>
           <p
-            className={`mt-0.5 text-xs lg:text-sm ${
-              isExpired ? "font-medium text-red-500" : "text-ds-muted"
-            }`}
+            className={`mt-0.5 text-xs lg:text-sm ${isExpired ? "font-medium text-red-500" : "text-ds-muted"
+              }`}
           >
             {statusText}
           </p>
@@ -50,11 +55,9 @@ export default function FileCard({
 
         {!isExpired && (
           <>
-            <Lock
-              size={16}
-              className="shrink-0 text-ds-muted lg:hidden"
-              aria-hidden
-            />
+            <span className="shrink-0 text-ds-muted lg:hidden" aria-label="Fichier protégé">
+              <Lock size={16} aria-hidden="true" />
+            </span>
             <div className="lg:hidden">
               <FileCardActionsMenu
                 onDelete={onDelete}
@@ -76,28 +79,29 @@ export default function FileCard({
           <button
             type="button"
             onClick={onCopyLink}
-            className="flex items-center gap-1.5 rounded-full border border-ds-salmon px-4 py-2 text-sm font-medium text-ds-salmon transition hover:bg-ds-peach"
+            aria-live="polite"
+            className="flex min-h-11 items-center gap-1.5 rounded-full border border-orange-700 text-orange-700 px-4 py-2 text-sm font-medium transition hover:bg-orange-100"
           >
-            <Copy size={16} strokeWidth={2} />
+            <Copy size={16} strokeWidth={2} aria-hidden="true" />
             {linkCopied ? "Lien copié" : "Copier le lien"}
           </button>
 
           <button
             type="button"
             onClick={onDelete}
-            className="flex items-center gap-1.5 rounded-full border border-ds-salmon px-4 py-2 text-sm font-medium text-ds-salmon transition hover:bg-ds-peach"
+            className="flex min-h-11 items-center gap-1.5 rounded-full border border-orange-700 text-orange-700 px-4 py-2 text-sm font-medium transition hover:bg-orange-100"
           >
-            <Trash2 size={16} strokeWidth={2} />
+            <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
             Supprimer
           </button>
 
           <button
             type="button"
             onClick={onAccess}
-            className="flex items-center gap-1.5 rounded-full border border-ds-salmon px-4 py-2 text-sm font-medium text-ds-salmon transition hover:bg-ds-peach"
+            className="flex min-h-11 items-center gap-1.5 rounded-full border border-orange-700 text-orange-700 px-4 py-2 text-sm font-medium transition hover:bg-orange-100"
           >
             Accéder
-            <ArrowRight size={16} strokeWidth={2} />
+            <ArrowRight size={16} strokeWidth={2} aria-hidden="true" />
           </button>
         </div>
       )}

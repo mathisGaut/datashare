@@ -1,237 +1,223 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+import useDocumentTitle from "../hooks/useDocumentTitle";
 import api from "../services/api";
 
+const inputClassName =
+  "w-full min-h-12 px-4 py-2.5 rounded-lg border border-gray-400 text-ds-ink placeholder:text-gray-600 focus:ring-2 focus:ring-orange-800 focus:border-orange-800 outline-none transition";
+
+const labelClassName = "block text-sm font-medium text-gray-900 mb-1";
+
 export default function RegisterPage() {
+  useDocumentTitle("Créer un compte");
 
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const [form, setForm] = useState({
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: "",
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+  });
+
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
     });
+    setFieldErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
+    setError("");
+  };
 
-    const [error, setError] = useState("");
-    const [fieldErrors, setFieldErrors] = useState({});
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value,
-        });
-        setFieldErrors((prev) => ({ ...prev, [e.target.name]: undefined }));
+    setError("");
+    setFieldErrors({});
+
+    if (form.password !== form.password_confirmation) {
+      setError("Les mots de passe ne correspondent pas.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      await api.post("/register", {
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+
+      navigate("/login", { state: { registered: true } });
+    } catch (err) {
+      const data = err.response?.data;
+
+      if (data?.errors) {
+        setFieldErrors(data.errors);
         setError("");
-    };
+      } else {
+        setError(
+          data?.message
+          || "Inscription impossible. Vérifiez vos informations.",
+        );
+      }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-        setError("");
-        setFieldErrors({});
+  const firstError = (key) =>
+    Array.isArray(fieldErrors[key]) ? fieldErrors[key][0] : fieldErrors[key];
 
-        if (form.password !== form.password_confirmation) {
-            setError("Passwords do not match.");
-            return;
-        }
+  const fieldIds = {
+    name: "register-name",
+    email: "register-email",
+    password: "register-password",
+    password_confirmation: "register-password-confirmation",
+  };
 
-        if (form.password.length < 6) {
-            setError("Password must be at least 6 characters.");
-            return;
-        }
+  const errorId = (key) => `${fieldIds[key]}-error`;
 
-        try {
+  return (
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-[#f3b08d] via-[#ea8c7d] to-[#e56b6f]">
+      <header className="fixed top-6 left-4 right-4 sm:left-16 sm:right-auto">
+        <Link
+          to="/"
+          className="text-3xl font-bold text-white drop-shadow-sm"
+        >
+          DataShare
+        </Link>
+      </header>
 
-            await api.post("/register", {
-                name: form.name,
-                email: form.email,
-                password: form.password,
-            });
-
-            navigate("/login", { state: { registered: true } });
-
-        } catch (err) {
-
-            const data = err.response?.data;
-
-            if (data?.errors) {
-                setFieldErrors(data.errors);
-                setError("");
-            } else {
-
-                setError(
-                    data?.message
-                    || "Registration failed. Please check your information."
-                );
-            }
-
-            console.error(err);
-        }
-    };
-
-    const firstError = (key) =>
-        Array.isArray(fieldErrors[key]) ? fieldErrors[key][0] : fieldErrors[key];
-
-    return (
-        <div className="min-h-screen bg-gradient-to-b from-[#f3b08d] via-[#ea8c7d] to-[#e56b6f] flex flex-col items-center justify-center px-4 py-12">
-            <h1 className="text-3xl font-bold text-gray-800 fixed top-6 left-16">
-                DataShare
-            </h1>
-            <div className="w-full max-w-md">
-
-                <div className="bg-white rounded-2xl shadow p-8">
-                    <div className="text-center mb-8">
-                        <p className="mt-2 font-bold text-2xl">
-                            Créer un compte
-                        </p>
-
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-
-                        <div>
-
-                            <label
-                                htmlFor="register-name"
-                                className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                Name
-                            </label>
-
-                            <input
-                                id="register-name"
-                                type="text"
-                                name="name"
-                                autoComplete="name"
-                                placeholder="Saisissez votre nom..."
-                                value={form.name}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                required
-                            />
-
-                            {firstError("name") && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {firstError("name")}
-                                </p>
-                            )}
-
-                        </div>
-
-                        <div>
-
-                            <label
-                                htmlFor="register-email"
-                                className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                Email
-                            </label>
-
-                            <input
-                                id="register-email"
-                                type="email"
-                                name="email"
-                                autoComplete="email"
-                                placeholder="Saisissez votre email..."
-                                value={form.email}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                required
-                            />
-
-                            {firstError("email") && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {firstError("email")}
-                                </p>
-                            )}
-
-                        </div>
-
-                        <div>
-
-                            <label
-                                htmlFor="register-password"
-                                className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                Password
-                            </label>
-
-                            <input
-                                id="register-password"
-                                type="password"
-                                name="password"
-                                autoComplete="new-password"
-                                placeholder="Saisissez votre mot de passe..."
-                                value={form.password}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                required
-                                minLength={6}
-                            />
-
-                            {firstError("password") && (
-                                <p className="text-sm text-red-600 mt-1">
-                                    {firstError("password")}
-                                </p>
-                            )}
-
-                        </div>
-
-                        <div>
-
-                            <label
-                                htmlFor="register-password-confirmation"
-                                className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                Confirm password
-                            </label>
-
-                            <input
-                                id="register-password-confirmation"
-                                type="password"
-                                name="password_confirmation"
-                                autoComplete="new-password"
-                                placeholder="Saisissez le à nouveau"
-                                value={form.password_confirmation}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-                                required
-                            />
-
-                        </div>
-
-                        {error && (
-                            <p className="text-sm text-red-600" role="alert">
-                                {error}
-                            </p>
-                        )}
-                        <div className="flex flex-col justify-between gap-1">
-                            <button
-                                type="button"
-                                className="w-full hover:bg-orange-100/50 text-orange-700 py-2.5 px-4 rounded-lg transition"
-                            >
-                                <Link
-                                    to="/login"
-                                    className="text-orange-600 hover:text-orange-700 font-medium"
-                                >
-                                    J'ai déja un compte
-                                </Link>
-                            </button>
-                            <button
-                                type="submit"
-                                className="w-full bg-orange-100 border border-orange-700 hover:bg-orange-200 text-orange-700 py-2.5 px-4 rounded-lg transition"
-                            >
-                                Créer mon compte
-                            </button>
-                        </div>
-                    </form>
-
-                </div>
-
+      <main
+        id="main-content"
+        className="flex flex-1 flex-col items-center justify-center px-4 py-12"
+      >
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl bg-white p-8 shadow">
+            <div className="mb-8 text-center">
+              <h1 className="text-2xl font-bold text-ds-ink">
+                Créer un compte
+              </h1>
             </div>
 
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
+              noValidate
+              aria-describedby={error ? "register-error" : undefined}
+            >
+              {(["name", "email", "password", "password_confirmation"]).map(
+                (field) => {
+                  const labels = {
+                    name: "Nom",
+                    email: "Email",
+                    password: "Mot de passe",
+                    password_confirmation: "Confirmer le mot de passe",
+                  };
+                  const placeholders = {
+                    name: "Saisissez votre nom...",
+                    email: "Saisissez votre email...",
+                    password: "Saisissez votre mot de passe...",
+                    password_confirmation: "Saisissez-le à nouveau",
+                  };
+                  const types = {
+                    name: "text",
+                    email: "email",
+                    password: "password",
+                    password_confirmation: "password",
+                  };
+                  const autoComplete = {
+                    name: "name",
+                    email: "email",
+                    password: "new-password",
+                    password_confirmation: "new-password",
+                  };
+                  const err = firstError(field);
+
+                  return (
+                    <div key={field}>
+                      <label
+                        htmlFor={fieldIds[field]}
+                        className={labelClassName}
+                      >
+                        {labels[field]}
+                      </label>
+
+                      <input
+                        id={fieldIds[field]}
+                        type={types[field]}
+                        name={field}
+                        autoComplete={autoComplete[field]}
+                        placeholder={placeholders[field]}
+                        value={form[field]}
+                        onChange={handleChange}
+                        className={inputClassName}
+                        required
+                        minLength={field === "password" ? 6 : undefined}
+                        aria-invalid={Boolean(err)}
+                        aria-describedby={err ? errorId(field) : undefined}
+                        disabled={submitting}
+                      />
+
+                      {err && (
+                        <p
+                          id={errorId(field)}
+                          className="mt-1 text-sm font-medium text-red-800"
+                          role="alert"
+                        >
+                          {err}
+                        </p>
+                      )}
+                    </div>
+                  );
+                },
+              )}
+
+              {error && (
+                <p
+                  id="register-error"
+                  className="text-sm font-medium text-red-800"
+                  role="alert"
+                >
+                  {error}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-3 pt-1">
+                <Link
+                  to="/login"
+                  className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-orange-900 px-4 text-base font-medium text-orange-900 transition hover:bg-orange-50"
+                >
+                  J&apos;ai déjà un compte
+                </Link>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  aria-busy={submitting}
+                  className="flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg bg-orange-900 px-4 text-base font-medium text-white transition hover:bg-orange-950 disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {submitting ? "Création…" : "Créer mon compte"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-    );
+      </main>
+    </div>
+  );
 }

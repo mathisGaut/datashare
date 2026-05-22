@@ -9,7 +9,11 @@ export default function useAuth() {
 
     const [user, setUser] = useState(null);
 
+    const [userError, setUserError] = useState("");
+
     const fetchUser = async () => {
+
+        setUserError("");
 
         try {
 
@@ -20,6 +24,10 @@ export default function useAuth() {
         } catch (error) {
 
             console.error(error);
+
+            setUserError(
+                "Impossible de charger votre profil.",
+            );
         }
     };
 
@@ -41,6 +49,7 @@ export default function useAuth() {
 
     return {
         user,
+        userError,
         fetchUser,
         logout,
     };
