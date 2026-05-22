@@ -155,7 +155,7 @@ export default function DownloadPage() {
                 className="flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-orange-600 bg-orange-100 py-2.5 text-orange-800 transition hover:bg-orange-200"
               >
                 <Download size={22} strokeWidth={2} aria-hidden="true" />
-                Télécharger {fileInfo.original_name}
+                Télécharger le fichier
               </button>
             </>
           )}
