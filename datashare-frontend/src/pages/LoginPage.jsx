@@ -46,24 +46,20 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-12">
+        <div className="min-h-screen bg-gradient-to-b from-[#f3b08d] via-[#ea8c7d] to-[#e56b6f] flex flex-col items-center justify-center px-4 py-12">
 
+            <h1 className="text-3xl font-bold text-gray-800 fixed top-6 left-16">
+                DataShare
+            </h1>
             <div className="w-full max-w-md">
 
-                <div className="text-center mb-8">
-
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        DataShare
-                    </h1>
-
-                    <p className="text-gray-500 mt-2">
-                        Sign in to your account
-                    </p>
-
-                </div>
-
                 <div className="bg-white rounded-2xl shadow p-8">
+                    <div className="text-center mb-8">
+                        <p className="mt-2 font-bold text-2xl">
+                            Connexion
+                        </p>
 
+                    </div>
                     {registered && (
                         <div
                             className="mb-6 rounded-lg bg-green-50 border border-green-200 text-green-800 text-sm px-4 py-3"
@@ -89,7 +85,7 @@ export default function LoginPage() {
                                 type="email"
                                 name="email"
                                 autoComplete="email"
-                                placeholder="you@example.com"
+                                placeholder="Saisissez votre email..."
                                 value={form.email}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -112,7 +108,7 @@ export default function LoginPage() {
                                 type="password"
                                 name="password"
                                 autoComplete="current-password"
-                                placeholder="••••••••"
+                                placeholder="Saisissez votre mot de passe..."
                                 value={form.password}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -126,30 +122,28 @@ export default function LoginPage() {
                                 {error}
                             </p>
                         )}
-
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition"
-                        >
-                            Sign in
-                        </button>
-
+                        <div className="flex flex-col justify-between gap-1">
+                            <button
+                                type="button"
+                                className="w-full hover:bg-orange-100/50 text-orange-700 py-2.5 px-4 rounded-lg transition"
+                            >
+                                <Link
+                                    to="/register"
+                                    className="text-orange-600 hover:text-orange-700 font-medium"
+                                >
+                                    Créer un compte
+                                </Link>
+                            </button>
+                            <button
+                                type="submit"
+                                className="w-full bg-orange-100 border border-orange-700 hover:bg-orange-200 text-orange-700 py-2.5 px-4 rounded-lg transition"
+                            >
+                                Connexion
+                            </button>
+                        </div>
                     </form>
 
                 </div>
-
-                <p className="text-center text-gray-600 text-sm mt-6">
-
-                    Don&apos;t have an account?{" "}
-
-                    <Link
-                        to="/register"
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                        Create one
-                    </Link>
-
-                </p>
 
             </div>
 

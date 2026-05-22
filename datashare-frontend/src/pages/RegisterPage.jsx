@@ -75,23 +75,19 @@ export default function RegisterPage() {
         Array.isArray(fieldErrors[key]) ? fieldErrors[key][0] : fieldErrors[key];
 
     return (
-        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center px-4 py-12">
-
+        <div className="min-h-screen bg-gradient-to-b from-[#f3b08d] via-[#ea8c7d] to-[#e56b6f] flex flex-col items-center justify-center px-4 py-12">
+            <h1 className="text-3xl font-bold text-gray-800 fixed top-6 left-16">
+                DataShare
+            </h1>
             <div className="w-full max-w-md">
 
-                <div className="text-center mb-8">
-
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        DataShare
-                    </h1>
-
-                    <p className="text-gray-500 mt-2">
-                        Create your account
-                    </p>
-
-                </div>
-
                 <div className="bg-white rounded-2xl shadow p-8">
+                    <div className="text-center mb-8">
+                        <p className="mt-2 font-bold text-2xl">
+                            Créer un compte
+                        </p>
+
+                    </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
 
@@ -109,7 +105,7 @@ export default function RegisterPage() {
                                 type="text"
                                 name="name"
                                 autoComplete="name"
-                                placeholder="Jane Doe"
+                                placeholder="Saisissez votre nom..."
                                 value={form.name}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -138,7 +134,7 @@ export default function RegisterPage() {
                                 type="email"
                                 name="email"
                                 autoComplete="email"
-                                placeholder="you@example.com"
+                                placeholder="Saisissez votre email..."
                                 value={form.email}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -167,7 +163,7 @@ export default function RegisterPage() {
                                 type="password"
                                 name="password"
                                 autoComplete="new-password"
-                                placeholder="At least 6 characters"
+                                placeholder="Saisissez votre mot de passe..."
                                 value={form.password}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -197,7 +193,7 @@ export default function RegisterPage() {
                                 type="password"
                                 name="password_confirmation"
                                 autoComplete="new-password"
-                                placeholder="Repeat password"
+                                placeholder="Saisissez le à nouveau"
                                 value={form.password_confirmation}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
@@ -211,30 +207,28 @@ export default function RegisterPage() {
                                 {error}
                             </p>
                         )}
-
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition"
-                        >
-                            Create account
-                        </button>
-
+                        <div className="flex flex-col justify-between gap-1">
+                            <button
+                                type="button"
+                                className="w-full hover:bg-orange-100/50 text-orange-700 py-2.5 px-4 rounded-lg transition"
+                            >
+                                <Link
+                                    to="/login"
+                                    className="text-orange-600 hover:text-orange-700 font-medium"
+                                >
+                                    J'ai déja un compte
+                                </Link>
+                            </button>
+                            <button
+                                type="submit"
+                                className="w-full bg-orange-100 border border-orange-700 hover:bg-orange-200 text-orange-700 py-2.5 px-4 rounded-lg transition"
+                            >
+                                Créer mon compte
+                            </button>
+                        </div>
                     </form>
 
                 </div>
-
-                <p className="text-center text-gray-600 text-sm mt-6">
-
-                    Already have an account?{" "}
-
-                    <Link
-                        to="/login"
-                        className="text-blue-600 hover:text-blue-700 font-medium"
-                    >
-                        Sign in
-                    </Link>
-
-                </p>
 
             </div>
 
