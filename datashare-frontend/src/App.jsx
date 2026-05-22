@@ -4,6 +4,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import LandingPage from "./pages/LandingPage";
 import DashboardPage from "./pages/DashboardPage";
+import DownloadPage from "./pages/DownloadPage";
 
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import GuestRoute from "./components/auth/GuestRoute";
@@ -51,6 +52,8 @@ export default function App() {
                         </ProtectedRoute>
                     }
                 />
+
+                <Route path="/download/:token" element={<DownloadPage />} />
 
             </Routes>
 

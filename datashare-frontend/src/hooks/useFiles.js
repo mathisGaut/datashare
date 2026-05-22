@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import api from "../services/api";
+import { getSharePageUrl } from "../utils/fileDisplay";
 
 export default function useFiles() {
 
@@ -175,11 +176,9 @@ export default function useFiles() {
     };
 
     const copyLink = async (token) => {
-
-        const url = `http://localhost/api/files/download/${token}`;
+        const url = getSharePageUrl(token);
 
         try {
-
             await navigator.clipboard.writeText(url);
 
             setCopiedToken(token);
@@ -187,9 +186,7 @@ export default function useFiles() {
             setTimeout(() => {
                 setCopiedToken(null);
             }, 2000);
-
         } catch (error) {
-
             console.error(error);
         }
     };

@@ -32,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 // Publics routes
 Route::prefix('files')->group(function () {
+    Route::get('/share/{token}', [FileController::class, 'shareInfo']);
     Route::get('/download/{token}', [FileController::class, 'download']);
 });
 

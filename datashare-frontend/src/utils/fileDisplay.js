@@ -1,7 +1,38 @@
 import api from "../services/api";
 
-export function getDownloadUrl(token) {
+export function getApiDownloadUrl(token) {
   return `${api.defaults.baseURL}/files/download/${token}`;
+}
+
+/** @deprecated use getApiDownloadUrl */
+export function getDownloadUrl(token) {
+  return getApiDownloadUrl(token);
+}
+
+export function getSharePageUrl(token) {
+  if (typeof window !== "undefined" && window.location?.origin) {
+    return `${window.location.origin}/download/${token}`;
+  }
+
+  return `/download/${token}`;
+}
+
+export function formatFileSize(bytes) {
+  if (bytes == null || Number.isNaN(Number(bytes))) {
+    return "—";
+  }
+
+  const size = Number(bytes);
+
+  if (size < 1024) {
+    return `${size} o`;
+  }
+
+  if (size < 1024 * 1024) {
+    return `${(size / 1024).toFixed(1).replace(".", ",")} Ko`;
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1).replace(".", ",")} Mo`;
 }
 
 export function getExpirationStatus(expiresAt) {

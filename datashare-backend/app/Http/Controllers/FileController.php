@@ -54,6 +54,41 @@ class FileController extends Controller
     }
 
     /**
+     * Public metadata for a shared file (download page).
+     */
+    public function shareInfo(string $token)
+    {
+        $file = File::where('token', $token)->first();
+
+        if (!$file) {
+            return response()->json([
+                'message' => 'File not available',
+            ], 404);
+        }
+
+        if ($file->expires_at && now()->greaterThan($file->expires_at)) {
+            return response()->json([
+                'message' => 'Download link expired',
+            ], 403);
+        }
+
+        if (!Storage::exists($file->path)) {
+            return response()->json([
+                'message' => 'File not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'file' => [
+                'original_name' => $file->original_name,
+                'size' => $file->size,
+                'mime_type' => $file->mime_type,
+                'expires_at' => $file->expires_at,
+            ],
+        ]);
+    }
+
+    /**
      * Download a file
      */
     public function download(string $token)

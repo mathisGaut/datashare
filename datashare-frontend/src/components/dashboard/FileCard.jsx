@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  Copy,
   FileAudio,
   FileImage,
   FileVideo,
@@ -22,6 +23,8 @@ export default function FileCard({
   isExpired = false,
   onDelete,
   onAccess,
+  onCopyLink,
+  linkCopied = false,
 }) {
   const Icon = FILE_ICONS[type] ?? FileImage;
 
@@ -53,7 +56,12 @@ export default function FileCard({
               aria-hidden
             />
             <div className="lg:hidden">
-              <FileCardActionsMenu onDelete={onDelete} onAccess={onAccess} />
+              <FileCardActionsMenu
+                onDelete={onDelete}
+                onAccess={onAccess}
+                onCopyLink={onCopyLink}
+                linkCopied={linkCopied}
+              />
             </div>
           </>
         )}
@@ -65,6 +73,15 @@ export default function FileCard({
         </p>
       ) : (
         <div className="hidden shrink-0 items-center justify-end gap-3 lg:flex">
+          <button
+            type="button"
+            onClick={onCopyLink}
+            className="flex items-center gap-1.5 rounded-full border border-ds-salmon px-4 py-2 text-sm font-medium text-ds-salmon transition hover:bg-ds-peach"
+          >
+            <Copy size={16} strokeWidth={2} />
+            {linkCopied ? "Lien copié" : "Copier le lien"}
+          </button>
+
           <button
             type="button"
             onClick={onDelete}

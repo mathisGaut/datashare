@@ -7,15 +7,22 @@ import useAuth from "../hooks/useAuth";
 import useFiles from "../hooks/useFiles";
 import {
   filterFilesByTab,
-  getDownloadUrl,
   getExpirationStatus,
   getFileType,
+  getSharePageUrl,
 } from "../utils/fileDisplay";
 
 export default function DashboardPage() {
   const { user, fetchUser, logout } = useAuth();
-  const { files, fetchFiles, uploadFile, deleteFile, uploadMessage } =
-    useFiles();
+  const {
+    files,
+    fetchFiles,
+    uploadFile,
+    deleteFile,
+    uploadMessage,
+    copyLink,
+    copiedToken,
+  } = useFiles();
 
   const [activeFilter, setActiveFilter] = useState("tous");
   const fileInputRef = useRef(null);
@@ -97,8 +104,10 @@ export default function DashboardPage() {
                 statusText={statusText}
                 isExpired={isExpired}
                 onDelete={() => deleteFile(file.id)}
+                onCopyLink={() => copyLink(file.token)}
+                linkCopied={copiedToken === file.token}
                 onAccess={() =>
-                  window.open(getDownloadUrl(file.token), "_blank")
+                  window.open(getSharePageUrl(file.token), "_blank")
                 }
               />
             );
